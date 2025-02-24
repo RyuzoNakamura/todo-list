@@ -1,3 +1,4 @@
+@section('title', 'Todoリスト')
 <x-app-layout>
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -16,6 +17,17 @@
                             </select>
                             <x-primary-button>追加</x-primary-button>
                         </div>
+
+                        <!-- エラーメッセージ表示部分を追加 -->
+                        @if ($errors->any())
+                            <div class="mt-2 p-4 bg-red-50 rounded-lg">
+                                <ul class="text-sm text-red-600">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
                     </form>
 
                     <!-- Todo一覧 -->
