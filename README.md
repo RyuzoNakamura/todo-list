@@ -39,7 +39,7 @@ wsl --install
 
 ```bash
 # リポジトリのクローン
-git clone [リポジトリURL]
+git clone https://github.com/RyuzoNakamura/todo-list.git
 cd todo-list
 
 # .envファイルの準備
