@@ -1,62 +1,69 @@
 <x-app-layout>
-    <div class="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
-        <form method="POST" action="{{ route('todos.store') }}">
-            @csrf
-            <textarea name="message" placeholder="{{ __('What\'s on your mind?') }}"
-                class="block w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm">{{ old('message') }}</textarea>
-            <x-input-error :messages="$errors->get('message')" class="mt-2" />
-            <x-primary-button class="mt-4">{{ __('Todo') }}</x-primary-button>
-        </form>
-
-        <div class="mt-6 bg-white shadow-sm rounded-lg divide-y">
-            @foreach ($todos as $todo)
-                <div class="p-6 flex space-x-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                    <div class="flex-l">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <span class="text-gray-800">{{ $todo->user->name }}</span>
-                                <small
-                                    class="ml-2 text-sm text-gray-600">{{ $todo->created_at->format('j M Y, g:i a') }}</small>
-                                @unless ($todo->created_at->eq($todo->updated_at))
-                                    <small class="text-sm text-gray-600"> &middot; {{ __('edited') }}</small>
-                                @endunless
-                            </div>
-                            @if ($todo->user->is(auth()->user()))
-                                <x-dropdown>
-                                    <x-slot name="trigger">
-                                        <button>
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400"
-                                                viewBox="0 0 20 20" fill="currentColor">
-                                                <path
-                                                    d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
-                                            </svg>
-                                        </button>
-                                    </x-slot>
-                                    <x-slot name="content">
-                                        <x-dropdown-link :href="route('todos.edit', $todo)">
-                                            {{ __('Edit') }}
-                                        </x-dropdown-link>
-                                        <form method="POST" action="{{ route('todos.destroy', $todo) }}">
-                                            @csrf
-                                            @method('delete')
-                                            <x-dropdown-link :href="route('todos.destroy', $todo)"
-                                                onclick="event.preventDefault(); this.closest('form').submit();">
-                                                {{ __('Delete') }}
-                                            </x-dropdown-link>
-                                        </form>
-                                    </x-slot>
-                                </x-dropdown>
-                            @endif
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 bg-white border-b border-gray-200">
+                    <!-- Todo作成フォーム -->
+                    <form method="POST" action="{{ route('todos.store') }}" class="mb-6">
+                        @csrf
+                        <div class="flex items-center gap-4">
+                            <x-text-input name="title" placeholder="新しいタスク" class="flex-1" />
+                            <input type="date" name="due_date" class="rounded-md border-gray-300">
+                            <select name="priority" class="rounded-md border-gray-300">
+                                @foreach ($priorities as $key => $value)
+                                    <option value="{{ $key }}">{{ $value }}</option>
+                                @endforeach
+                            </select>
+                            <x-primary-button>追加</x-primary-button>
                         </div>
-                        <p class="mt-4 text-lg text-gray-900">{{ $todo->message }}</p>
+                    </form>
+
+                    <!-- Todo一覧 -->
+                    <div class="space-y-4">
+                        @foreach ($todos as $todo)
+                            <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                                <form method="POST" action="{{ route('todos.toggle-complete', $todo) }}">
+                                    @csrf
+                                    @method('PATCH')
+                                    {{-- チェックボックス --}}
+                                    <input type="checkbox" class="todo-checkbox rounded"
+                                        data-todo-id="{{ $todo->id }}" {{ $todo->is_completed ? 'checked' : '' }}>
+                                </form>
+
+                                <div class="flex-1">
+                                    <h3
+                                        class="font-semibold {{ $todo->is_completed ? 'line-through text-gray-400' : '' }}">
+                                        {{ $todo->title }}
+                                    </h3>
+                                    @if ($todo->due_date)
+                                        <p class="text-sm text-gray-600">期限: {{ $todo->due_date->format('Y/m/d') }}</p>
+                                    @endif
+                                </div>
+
+                                <span
+                                    class="px-2 py-1 text-sm rounded-full
+                                    {{ $todo->priority === 'high'
+                                        ? 'bg-red-100 text-red-800'
+                                        : ($todo->priority === 'medium'
+                                            ? 'bg-yellow-100 text-yellow-800'
+                                            : 'bg-blue-100 text-blue-800') }}">
+                                    {{ $priorities[$todo->priority] }}
+                                </span>
+
+                                <a href="{{ route('todos.edit', $todo) }}" class="text-gray-500 hover:text-gray-700">
+                                    編集
+                                </a>
+
+                                <form method="POST" action="{{ route('todos.destroy', $todo) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="text-red-500 hover:text-red-700">削除</button>
+                                </form>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
-            @endforeach
+            </div>
         </div>
     </div>
 </x-app-layout>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Todo;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -12,12 +13,21 @@ use Illuminate\View\View;
 class TodoController extends Controller
 {
 	/**
-	 * Display a listing of the resource.
+	 * 一覧表示
+	 * 期限日順で並び替え
+	 * 優先度による並び替え
+	 * ソート順を変更できるようにする
 	 */
 	public function index(): View
 	{
+		$todos = auth()->user()->todos()
+			->orderBy('due_date')
+			->orderBy('priority')
+			->get();
+
 		return view('todos.index', [
-			'todos' => Todo::with('user')->latest()->get(),
+			'todos' => $todos,
+			'priorities' => Todo::priorities(),
 		]);
 	}
 
@@ -30,12 +40,16 @@ class TodoController extends Controller
 	}
 
 	/**
-	 * Store a newly created resource in storage.
+	 * todoの追加
+	 * 
 	 */
 	public function store(Request $request): RedirectResponse
 	{
 		$validated = $request->validate([
-			'message' => 'required|string|max:255',
+			'title' => 'required|string|max:255',
+			'description' => 'nullable|string,',
+			'due_date' => 'nullable|date',
+			'priority' => 'required|in:low,medium,high',
 		]);
 		$request->user()->todos()->create($validated);
 		return redirect()->route('todos.index');
@@ -55,7 +69,10 @@ class TodoController extends Controller
 	public function edit(Todo $todo): View
 	{
 		Gate::authorize('update', $todo);
-		return view('todos.edit', ['todo' => $todo]);
+		return view('todos.edit', [
+			'todo' => $todo,
+			'priorities' => Todo::priorities(),
+		]);
 	}
 
 	/**
@@ -65,10 +82,26 @@ class TodoController extends Controller
 	{
 		Gate::authorize('update', $todo);
 		$validated = $request->validate([
-			'message' => 'required|string|max:255',
+			'title' => 'required|string|max:255',
+			'description' => 'nullable|string',
+			'due_date' => 'nullable|date',
+			'priority' => 'required|in:low,medium,high',
+			'is_completed' => 'boolean',
+
 		]);
 		$todo->update($validated);
 		return redirect()->route('todos.index');
+	}
+
+	public function toggleComplete(Todo $todo): JsonResponse
+	{
+		$todo->update([
+			'is_completed' => !$todo->is_completed,
+		]);
+		return response()->json([
+			'success' => true,
+			'is_completed' => $todo->is_completed,
+		]);
 	}
 
 	/**

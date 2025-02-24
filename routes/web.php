@@ -22,4 +22,8 @@ Route::resource('todos', TodoController::class)
 	->only(['index', 'store', 'edit', 'update', 'destroy'])
 	->middleware(['auth', 'verified']);
 
+Route::patch('/todos/{todo}/toggle-complete', [TodoController::class, 'toggleComplete'])
+	->name('todos.toggle-complete')
+	->middleware(['auth', 'verified']);
+
 require __DIR__ . '/auth.php';
