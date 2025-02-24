@@ -22,7 +22,7 @@ class TodoController extends Controller
 	{
 		$todos = auth()->user()->todos()
 			->orderBy('due_date')
-			->orderBy('priority')
+			->orderByPriorityDesc()
 			->get();
 
 		return view('todos.index', [
