@@ -37,26 +37,46 @@ wsl --install
 
 ## 1.2. 開発環境のセットアップ手順
 
+全て wsl2 環境で行う前提です。
+
+1. プロジェクトをクローンしていい場所に cd します。
+
+2. 以下を実行
+
 ```bash
 # リポジトリのクローン
 git clone https://github.com/RyuzoNakamura/todo-list.git
 cd todo-list
 
+# composerが入っているdockerコンテナをインストール
+docker run --rm \
+    -u "$(id -u):$(id -g)" \
+    -v $(pwd):/var/www/html \
+    -w /var/www/html \
+    laravelsail/php84-composer:latest \
+    composer install --ignore-platform-reqs
+
 # .envファイルの準備
 cp .env.example .env
 
-# Sailのインストールと起動
-composer require laravel/sail --dev
-php artisan sail:install
-./vendor/bin/sail up -d
-
-# 依存パッケージのインストール
-sail composer install
-sail npm install
-
-# マイグレーションの実行
-sail artisan migrate
-
-# フロントエンドのビルド
-sail npm run dev
 ```
+
+3. .env ファイルを開き、以下のように修正
+
+```.env
+# DB_HOST = 127.0.0.1
+↓
+DB_HOST = sqlite
+```
+
+4. ターミナルで以下を実行
+
+```bash
+.vendor/bin/sail up -d
+sail artisan key:generate
+sail artisan migrate
+sail npm install
+sail nepm run dev
+```
+
+5. http://localhost/ にアクセス
