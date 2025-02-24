@@ -14,7 +14,11 @@ return new class extends Migration
 		Schema::create('todos', function (Blueprint $table) {
 			$table->id();
 			$table->foreignId('user_id')->constrained()->cascadeOnDelete();
-			$table->string('message');
+			$table->string('title');
+			$table->text('description')->nullable();
+			$table->boolean('is_completed')->default(false);
+			$table->date('due_date')->nullable();
+			$table->enum('priority', ['low', 'medium', 'high'])->default('medium');
 			$table->timestamps();
 		});
 	}

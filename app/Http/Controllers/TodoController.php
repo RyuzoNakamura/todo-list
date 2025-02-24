@@ -6,6 +6,7 @@ use App\Models\Todo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class TodoController extends Controller
@@ -51,24 +52,32 @@ class TodoController extends Controller
 	/**
 	 * Show the form for editing the specified resource.
 	 */
-	public function edit(Todo $todo)
+	public function edit(Todo $todo): View
 	{
-		//
+		Gate::authorize('update', $todo);
+		return view('todos.edit', ['todo' => $todo]);
 	}
 
 	/**
 	 * Update the specified resource in storage.
 	 */
-	public function update(Request $request, Todo $todo)
+	public function update(Request $request, Todo $todo): RedirectResponse
 	{
-		//
+		Gate::authorize('update', $todo);
+		$validated = $request->validate([
+			'message' => 'required|string|max:255',
+		]);
+		$todo->update($validated);
+		return redirect()->route('todos.index');
 	}
 
 	/**
 	 * Remove the specified resource from storage.
 	 */
-	public function destroy(Todo $todo)
+	public function destroy(Todo $todo): RedirectResponse
 	{
-		//
+		Gate::authorize('delete', $todo);
+		$todo->delete();
+		return redirect()->route('todos.index');
 	}
 }
