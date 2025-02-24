@@ -72,11 +72,11 @@ DB_HOST = sqlite
 4. ターミナルで以下を実行
 
 ```bash
-.vendor/bin/sail up -d
-sail artisan key:generate
-sail artisan migrate
-sail npm install
-sail nepm run dev
+./vendor/bin/sail up -d
+./vendor/bin/sail artisan key:generate
+./vendor/bin/sail artisan migrate
+./vendor/bin/sail npm install
+./vendor/bin/sail nepm run dev
 ```
 
 5. http://localhost/ にアクセス
