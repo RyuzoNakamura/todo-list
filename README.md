@@ -42,6 +42,7 @@ wsl --install
 1. プロジェクトをクローンしていい場所に `cd` します。
 
 2. 以下を実行
+   途中「データベース作りますか？」と質問されますが、そのまま Enter で OK です。
 
 ```bash
 # リポジトリのクローン
@@ -59,24 +60,26 @@ docker run --rm \
 # .envファイルの準備
 cp .env.example .env
 
-```
-
-3. .env ファイルを開き、以下のように修正
-
-```.env
-# DB_HOST = 127.0.0.1
-↓
-DB_HOST = sqlite
-```
-
-4. ターミナルで以下を実行
-
-```bash
 ./vendor/bin/sail up -d
 ./vendor/bin/sail artisan key:generate
 ./vendor/bin/sail artisan migrate
 ./vendor/bin/sail npm install
-./vendor/bin/sail nepm run dev
+./vendor/bin/sail artisan migrate:fresh --seed  # データベースをリセットしてシードを実行
+./vendor/bin/sail npm run dev
 ```
 
-5. http://localhost/ にアクセス
+3.  http://localhost/ にアクセス
+
+ログインページのユーザー名およびパスワードはそれぞれ
+
+-   ユーザー名
+
+```
+test@example.com
+```
+
+-   パスワード
+
+```
+password
+```
