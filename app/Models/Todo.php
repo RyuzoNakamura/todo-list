@@ -39,4 +39,10 @@ class Todo extends Model
 			self::PRIORITY_HIGH => '高',
 		];
 	}
+
+	// 優先度を降順で並び替える
+	public function scopeOrderByPriorityDesc($query)
+	{
+		return $query->orderBy('priority', 'desc');
+	}
 }
