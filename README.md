@@ -50,19 +50,19 @@ Laravel Sail を使用しています。
 
 ### 2.1. モデル
 
--   Todo
--   User(breeze で自動的に作られたものです)
+-   **Todo**
+-   **User**(breeze で自動的に作られたものです)
 
 ### 2.2. ビュー
 
--   todo
+-   **todo**
     -   index, edit
--   user
+-   **user**
     -   profile(breeze)
 
 ### 2.3. コントローラ
 
--   TodoController
+-   **TodoController**
     -   index, store, edit, destroy を提供
     -   チェックボックスのトグル機能を別に実装
 
@@ -94,14 +94,14 @@ docker run --rm \
     laravelsail/php84-composer:latest \
     composer install --ignore-platform-reqs
 
-# .envファイルの準備
+# .envファイルを作成
 cp .env.example .env
 
 ./vendor/bin/sail up -d
 ./vendor/bin/sail artisan key:generate
 ./vendor/bin/sail artisan migrate
 ./vendor/bin/sail npm install
-./vendor/bin/sail artisan migrate:fresh --seed  # データベースをリセットして初期データを追加
+./vendor/bin/sail artisan migrate:fresh --seed  # 初期データを追加
 ./vendor/bin/sail npm run dev
 ```
 
