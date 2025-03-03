@@ -41,7 +41,7 @@ Laravel Sail を使用しています。
 - PHP: 8.4.4
 - Composer: 2.8.6
 - MySPL: 8.0.32
-- redis: 7.74.2
+- redis: 7.4.2
 - Node.js: 22.14.0
 - NPM: 11.1.0
 ```
