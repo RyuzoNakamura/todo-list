@@ -7,15 +7,20 @@
                     <!-- Todo作成フォーム -->
                     <form method="POST" action="{{ route('todos.store') }}" class="mb-6">
                         @csrf
-                        <div class="flex items-center gap-4">
-                            <x-text-input name="title" placeholder="新しいタスク" class="flex-1" />
-                            <input type="date" name="due_date" class="rounded-md border-gray-300">
-                            <select name="priority" class="rounded-md border-gray-300">
-                                @foreach ($priorities as $key => $value)
-                                    <option value="{{ $key }}">{{ $value }}</option>
-                                @endforeach
-                            </select>
-                            <x-primary-button>追加</x-primary-button>
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                            <x-text-input name="title" placeholder="新しいタスク" class="w-full sm:flex-1" />
+                            <div class="flex flex-col sm:flex-row w-full sm:w-auto gap-4">
+                                <input type="date" name="due_date"
+                                    class="rounded-md border-gray-300 w-full sm:w-auto">
+                                <select name="priority" class="rounded-md border-gray-300 w-full sm:w-auto">
+                                    @foreach ($priorities as $key => $value)
+                                        <option value="{{ $key }}">{{ $value }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="w-full sm:w-auto">
+                                    <x-primary-button class="w-full justify-center sm:w-auto">追加</x-primary-button>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- エラーメッセージ表示部分を追加 -->
@@ -32,18 +37,20 @@
 
                     {{-- 表示オプション --}}
                     <div class="mb-6">
-                        <a href="{{ route('todos.index', ['filter' => 'all']) }}"
-                            class="px-3 py-2 text-sm rounded-lg {{ request('filter', 'all') === 'all' ? 'bg-blue-500 text-black' : 'bg-gray-200 text-gray-700' }}">
-                            すべて
-                        </a>
-                        <a href="{{ route('todos.index', ['filter' => 'active']) }}"
-                            class="px-3 py-2 text-sm rounded-lg {{ request('filter') === 'active' ? 'bg-blue-500 text-black' : 'bg-gray-200 text-gray-700' }}">
-                            未完了のみ
-                        </a>
-                        <a href="{{ route('todos.index', ['filter' => 'completed']) }}"
-                            class="px-3 py-2 text-sm rounded-lg {{ request('filter') === 'completed' ? 'bg-blue-500 text-black' : 'bg-gray-200 text-gray-700' }}">
-                            完了済みのみ
-                        </a>
+                        <div class="flex flex-wrap gap-2">
+                            <a href="{{ route('todos.index', ['filter' => 'all']) }}"
+                                class="px-3 py-2 text-sm rounded-lg {{ request('filter', 'all') === 'all' ? 'bg-blue-500 text-black' : 'bg-gray-200 text-gray-700' }}">
+                                すべて
+                            </a>
+                            <a href="{{ route('todos.index', ['filter' => 'active']) }}"
+                                class="px-3 py-2 text-sm rounded-lg {{ request('filter') === 'active' ? 'bg-blue-500 text-black' : 'bg-gray-200 text-gray-700' }}">
+                                未完了のみ
+                            </a>
+                            <a href="{{ route('todos.index', ['filter' => 'completed']) }}"
+                                class="px-3 py-2 text-sm rounded-lg {{ request('filter') === 'completed' ? 'bg-blue-500 text-black' : 'bg-gray-200 text-gray-700' }}">
+                                完了済みのみ
+                            </a>
+                        </div>
 
                         <!-- Todo一覧 -->
                         <div class="space-y-4">
