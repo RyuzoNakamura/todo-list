@@ -30,52 +30,70 @@
                         @endif
                     </form>
 
-                    <!-- Todo一覧 -->
-                    <div class="space-y-4">
-                        @foreach ($todos as $todo)
-                            <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                                <form method="POST" action="{{ route('todos.toggle-complete', $todo) }}">
-                                    @csrf
-                                    @method('PATCH')
-                                    {{-- チェックボックス --}}
-                                    <input type="checkbox" class="todo-checkbox rounded"
-                                        data-todo-id="{{ $todo->id }}" {{ $todo->is_completed ? 'checked' : '' }}>
-                                </form>
+                    {{-- 表示オプション --}}
+                    <div class="mb-6">
+                        <a href="{{ route('todos.index', ['filter' => 'all']) }}"
+                            class="px-3 py-2 text-sm rounded-lg {{ request('filter', 'all') === 'all' ? 'bg-blue-500 text-black' : 'bg-gray-200 text-gray-700' }}">
+                            すべて
+                        </a>
+                        <a href="{{ route('todos.index', ['filter' => 'active']) }}"
+                            class="px-3 py-2 text-sm rounded-lg {{ request('filter') === 'active' ? 'bg-blue-500 text-black' : 'bg-gray-200 text-gray-700' }}">
+                            未完了のみ
+                        </a>
+                        <a href="{{ route('todos.index', ['filter' => 'completed']) }}"
+                            class="px-3 py-2 text-sm rounded-lg {{ request('filter') === 'completed' ? 'bg-blue-500 text-black' : 'bg-gray-200 text-gray-700' }}">
+                            完了済みのみ
+                        </a>
 
-                                <div class="flex-1">
-                                    <h3
-                                        class="font-semibold {{ $todo->is_completed ? 'line-through text-gray-400' : '' }}">
-                                        {{ $todo->title }}
-                                    </h3>
-                                    @if ($todo->due_date)
-                                        <p class="text-sm text-gray-600">期限: {{ $todo->due_date->format('Y/m/d') }}</p>
-                                    @endif
-                                </div>
+                        <!-- Todo一覧 -->
+                        <div class="space-y-4">
+                            @foreach ($todos as $todo)
+                                <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                                    <form method="POST" action="{{ route('todos.toggle-complete', $todo) }}">
+                                        @csrf
+                                        @method('PATCH')
+                                        {{-- チェックボックス --}}
+                                        <input type="checkbox" class="todo-checkbox rounded"
+                                            onchange="this.form.submit()" data-todo-id="{{ $todo->id }}"
+                                            {{ $todo->is_completed ? 'checked' : '' }}>
+                                    </form>
 
-                                <span
-                                    class="px-2 py-1 text-sm rounded-full
+                                    <div class="flex-1">
+                                        <h3
+                                            class="font-semibold {{ $todo->is_completed ? 'line-through text-gray-400' : '' }}">
+                                            {{ $todo->title }}
+                                        </h3>
+                                        @if ($todo->due_date)
+                                            <p class="text-sm text-gray-600">期限: {{ $todo->due_date->format('Y/m/d') }}
+                                            </p>
+                                        @endif
+                                    </div>
+
+                                    <span
+                                        class="px-2 py-1 text-sm rounded-full
                                     {{ $todo->priority === 'high'
                                         ? 'bg-red-100 text-red-800'
                                         : ($todo->priority === 'medium'
                                             ? 'bg-yellow-100 text-yellow-800'
                                             : 'bg-blue-100 text-blue-800') }}">
-                                    {{ $priorities[$todo->priority] }}
-                                </span>
+                                        {{ $priorities[$todo->priority] }}
+                                    </span>
 
-                                <a href="{{ route('todos.edit', $todo) }}" class="text-gray-500 hover:text-gray-700">
-                                    編集
-                                </a>
+                                    <a href="{{ route('todos.edit', $todo) }}"
+                                        class="text-gray-500 hover:text-gray-700">
+                                        編集
+                                    </a>
 
-                                <form method="POST" action="{{ route('todos.destroy', $todo) }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="text-red-500 hover:text-red-700">削除</button>
-                                </form>
-                            </div>
-                        @endforeach
+                                    <form method="POST" action="{{ route('todos.destroy', $todo) }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="text-red-500 hover:text-red-700">削除</button>
+                                    </form>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 </x-app-layout>
