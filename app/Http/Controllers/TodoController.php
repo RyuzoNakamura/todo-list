@@ -3,10 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Todo;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
@@ -18,16 +16,26 @@ class TodoController extends Controller
 	 * 優先度による並び替え
 	 * ソート順を変更できるようにする
 	 */
-	public function index(): View
+	public function index(Request $request): View
 	{
-		$todos = auth()->user()->todos()
-			->orderBy('due_date')
+		$filter = $request->query('filter', 'all');
+
+		$query = auth()->user()->todos();
+
+		if ($filter === 'active') {
+			$query->where('is_completed', false);
+		} elseif ($filter === 'completed') {
+			$query->where('is_completed', true);
+		}
+
+		$todos = $query->orderBy('due_date')
 			->orderByPriorityDesc()
 			->get();
 
 		return view('todos.index', [
 			'todos' => $todos,
 			'priorities' => Todo::priorities(),
+			'filter' => $filter,
 		]);
 	}
 
@@ -93,15 +101,13 @@ class TodoController extends Controller
 		return redirect()->route('todos.index');
 	}
 
-	public function toggleComplete(Todo $todo): JsonResponse
+	public function toggleComplete(Todo $todo)
 	{
 		$todo->update([
 			'is_completed' => !$todo->is_completed,
 		]);
-		return response()->json([
-			'success' => true,
-			'is_completed' => $todo->is_completed,
-		]);
+
+		return redirect()->back();
 	}
 
 	/**
