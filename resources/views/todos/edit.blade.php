@@ -38,6 +38,7 @@
 
                         <div>
                             <label class="inline-flex items-center">
+                                <input type="hidden" name="is_completed" value="0">
                                 <input type="checkbox" name="is_completed" value="1"
                                     {{ $todo->is_completed ? 'checked' : '' }} class="rounded">
                                 <span class="ml-2">完了</span>
