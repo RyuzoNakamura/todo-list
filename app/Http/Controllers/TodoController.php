@@ -37,14 +37,6 @@ class TodoController extends Controller
 
 		$query->orderBy('due_date')->orderByPriorityDesc();
 
-		// クエリビルダーが生成するSQLを確認
-		$sql = $query->toSql();
-		$bindings = $query->getBindings();
-
-		// 確認用にログに出力
-		\Log::info('Generated SQL: ' . $sql);
-		\Log::info('Bindings: ', $bindings);
-
 		$todos = $query->get();
 
 		return view('todos.index', [
@@ -109,7 +101,8 @@ class TodoController extends Controller
 			'due_date' => 'nullable|date',
 			'priority' => 'required|in:low,medium,high',
 		]);
-		$request->user()->todos()->create($validated);
+		$query = $request->user()->todos()->create($validated);
+		$sql = $query->toSql();
 		return redirect()->route('todos.index');
 	}
 
