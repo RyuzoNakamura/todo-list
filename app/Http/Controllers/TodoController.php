@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Todo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
@@ -18,6 +20,11 @@ class TodoController extends Controller
 	 */
 	public function index(Request $request): View
 	{
+		return $this->indexSqlVersion($request);
+	}
+
+	private function indexOrmVersion(Request $request): View
+	{
 		$filter = $request->query('filter', 'all');
 
 		$query = auth()->user()->todos();
@@ -28,13 +35,56 @@ class TodoController extends Controller
 			$query->where('is_completed', true);
 		}
 
-		$todos = $query->orderBy('due_date')
-			->orderByPriorityDesc()
-			->get();
+		$query->orderBy('due_date')->orderByPriorityDesc();
+
+		// クエリビルダーが生成するSQLを確認
+		$sql = $query->toSql();
+		$bindings = $query->getBindings();
+
+		// 確認用にログに出力
+		\Log::info('Generated SQL: ' . $sql);
+		\Log::info('Bindings: ', $bindings);
+
+		$todos = $query->get();
 
 		return view('todos.index', [
 			'todos' => $todos,
 			'priorities' => Todo::priorities(),
+			'filter' => $filter,
+		]);
+	}
+
+	private function indexSqlVersion(Request $request): View
+	{
+		$filter = $request->query('filter', 'all');
+
+		$userId = Auth::id();
+		$sql = 'SELECT * FROM todos WHERE todos.user_id = ?';
+		$bindings = [$userId];
+
+		if ($filter === 'active') {
+			$sql .= ' AND is_completed = ?';
+			$bindings[] = 0;
+		} elseif ($filter === 'completed') {
+			$sql .= ' AND is_completed = ?';
+			$bindings[] = 1;
+		}
+
+		$sql .= ' ORDER BY due_date ASC, priority DESC';
+
+		$todos = DB::select($sql, $bindings);
+
+		$todoCollection = collect($todos)->map(function ($todo) {
+			$todoModel = new \App\Models\Todo((array)$todo);
+			$todoModel->forceFill((array)$todo);
+			$todoModel->id = $todo->id;
+			$todoModel->exists = true;
+			return $todoModel;
+		});
+
+		return view('todos.index', [
+			'todos' => $todoCollection,
+			'priorities' => \App\Models\Todo::priorities(),
 			'filter' => $filter,
 		]);
 	}
@@ -95,19 +145,30 @@ class TodoController extends Controller
 			'due_date' => 'nullable|date',
 			'priority' => 'required|in:low,medium,high',
 			'is_completed' => 'boolean',
-
 		]);
-		$todo->update($validated);
+
+		$sql = 'UPDATE todos SET title = ?, description = ?, due_date = ?, priority = ?, is_completed = ? WHERE id = ?';
+		$bindings = [
+			$validated['title'],
+			$validated['description'],
+			$validated['due_date'],
+			$validated['priority'],
+			$validated['is_completed'],
+			$todo->id,
+		];
+
+		DB::update($sql, $bindings);
+
 		return redirect()->route('todos.index');
 	}
 
-	public function toggleComplete(Todo $todo)
+	public function toggleComplete(Todo $todo): RedirectResponse
 	{
 		$todo->update([
 			'is_completed' => !$todo->is_completed,
 		]);
 
-		return redirect()->back();
+		return redirect()->route('todos.index');
 	}
 
 	/**
