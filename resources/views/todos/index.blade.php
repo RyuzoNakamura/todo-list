@@ -56,7 +56,8 @@
                         <div class="space-y-4">
                             @foreach ($todos as $todo)
                                 <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                                    <form method="POST" action="{{ route('todos.toggle-complete', $todo) }}">
+                                    <form method="POST"
+                                        action="{{ route('todos.toggle-complete', ['todo' => $todo->id]) }}">
                                         @csrf
                                         @method('PATCH')
                                         {{-- チェックボックス --}}
